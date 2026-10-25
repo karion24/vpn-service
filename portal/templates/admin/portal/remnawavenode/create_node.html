@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Создать ноду Remnawave{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Главная</a>
+    &rsaquo;
+    <a href="{% url 'admin:portal_remnawavenode_changelist' %}">
+        Ноды Remnawave
+    </a>
+    &rsaquo; Создать ноду
+</div>
+{% endblock %}
+
+{% block content %}
+
+<h1>Создать ноду Remnawave</h1>
+
+<p>
+    Будут автоматически созданы Node и Host в выбранной панели
+    Remnawave, а затем локальная запись в портале.
+</p>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+
+    <fieldset class="module aligned">
+
+        {% for field in form %}
+        <div class="form-row">
+            <div>
+                {{ field.errors }}
+
+                {{ field.label_tag }}
+
+                {{ field }}
+
+                {% if field.help_text %}
+                <div class="help">
+                    {{ field.help_text }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+    </fieldset>
+
+    <div class="submit-row">
+        <input
+            type="submit"
+            value="Создать ноду"
+            class="default"
+        >
+
+        <a
+            href="{% url 'admin:portal_remnawavenode_changelist' %}"
+            class="closelink"
+        >
+            Отмена
+        </a>
+    </div>
+</form>
+
+{% endblock %}

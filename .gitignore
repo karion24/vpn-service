@@ -1,0 +1,65 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Secrets
+.env
+.env.*
+*.env
+*.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+
+# Databases
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.sql
+
+# Runtime
+downloads/
+run/
+media/
+staticfiles/
+*.log
+*.bak
+*.bak-*
+
+# Windows binaries
+*.exe
+*.dll
+
+# VPN binaries and databases
+windows-template/bin/
+*.dat
+
+# Archives
+*.zip
+*.tar
+*.gz
+*.7z
+
+# Excluded project directories
+/downloads/
+/windows-template/
+
+# Historical source backups
+*.backup_*
+*.before_*
+*.orig
+*.save
+
+# Accidental empty files
+/device
+/Заказ
+/Параметры
+/Платёж
+/Тариф
+/Устройство

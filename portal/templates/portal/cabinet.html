@@ -1,0 +1,642 @@
+{% extends "portal/account_base.html" %}
+
+{% block title %}Личный кабинет — Karion{% endblock %}
+
+{% block content %}
+<div class="page">
+
+    <div class="cabinet-header">
+        <h1>Личный кабинет</h1>
+
+        <p class="subtitle">
+            Управление подписками и подключениями Karion
+        </p>
+
+        <div style="margin-top: 16px;">
+            <a
+                class="button button-secondary"
+                href="{% url 'how_to_connect' %}"
+            >
+                Как подключиться?
+            </a>
+        </div>
+    </div>
+
+    {% if refresh_payment_status %}
+    <div class="card" style="margin-bottom: 16px;">
+        <div class="subtitle" role="status">
+            Проверяем оплату и активацию подписок. Данные обновятся автоматически.
+        </div>
+    </div>
+    <script>
+        // Подтверждение оплаты приходит от шлюза асинхронно.
+        // Обновляем только страницу с незавершёнными заказами.
+        window.setTimeout(function () {
+            if (document.visibilityState === 'visible') {
+                window.location.reload();
+            }
+        }, 5000);
+    </script>
+    {% endif %}
+
+    {% if processing_orders %}
+    <div class="card" style="margin-bottom: 24px;">
+        <div class="subscriptions-header">
+            <div>
+                <h2>Оплаченные заказы</h2>
+                <div class="subtitle">Оплата получена, выполняется активация или синхронизация</div>
+            </div>
+        </div>
+        {% for order in processing_orders %}
+        <div class="subscription">
+            <div class="subscription-top">
+                <div>
+                    <div class="subscription-name">Доступ к IT-сервису Karion — {{ order.duration_days }} дней</div>
+                    <div class="subscription-meta">
+                        Заказ №{{ order.id }} · {{ order.duration_days }} дней ·
+                        до {{ order.device_limit }} устройств
+                    </div>
+                </div>
+                <span class="status status-active">Оплачено</span>
+            </div>
+            <div class="subtitle" style="margin-top: 12px;">
+                {% if order.fulfillment_status == "error" %}
+                    Требуется проверка активации администратором. Оплата сохранена.
+                {% else %}
+                    Подписка активируется. Она появится в разделе «Мои подписки» после завершения обработки.
+                {% endif %}
+            </div>
+            <div style="margin-top: 12px;">
+                <a class="button button-secondary" href="{% url 'order_detail' order.id %}">Подробнее</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if pending_orders %}
+
+    <div class="card" style="margin-bottom: 24px;">
+
+        <div class="subscriptions-header">
+            <div>
+                <h2>Ожидают оплаты</h2>
+
+                <div class="subtitle">
+                    Подписки, которые ещё не оплачены
+                </div>
+            </div>
+        </div>
+
+        {% for order in pending_orders %}
+
+            <div class="subscription">
+
+                <div class="subscription-top">
+
+                    <div>
+
+                        <div class="subscription-name">
+                            Доступ к IT-сервису Karion — {{ order.duration_days }} дней
+                        </div>
+
+                        <div class="subscription-meta">
+
+                            {% if order.order_type == "renewal" %}
+                                Тип:
+                                <strong>Продление</strong>
+                            {% else %}
+                                Тип:
+                                <strong>Новое подключение</strong>
+                            {% endif %}
+
+                            <br>
+
+                            Тариф:
+                            <strong>
+                                Доступ к IT-сервису Karion — {{ order.duration_days }} дней
+                            </strong>
+
+                            <br>
+
+                            {{ order.duration_days }} дней ·
+                            до {{ order.device_limit }} устройств
+
+                            <br>
+
+                            Оплатить до:
+                            <strong>
+                                {{ order.payment_expires_at|date:"d.m.Y H:i:s" }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                    <div style="text-align: right;">
+
+                        <div style="
+                            font-size: 20px;
+                            font-weight: 800;
+                            margin-bottom: 8px;
+                        ">
+                            {{ order.amount|floatformat:0 }} ₽
+                        </div>
+
+                        <span class="status status-disabled">
+                            Ожидает оплаты
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div style="margin-top: 16px;">
+
+                    <a
+                        class="button button-secondary"
+                        href="{% url 'order_detail' order.id %}"
+                    >
+                        Оплатить
+                    </a>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% endif %}
+
+
+    <div class="card">
+
+        <div class="subscriptions-header">
+            <div>
+                <h2>Мои подписки</h2>
+                <div class="subtitle">
+                    Ваши подключения
+                </div>
+            </div>
+
+            <a
+                class="button button-primary"
+                href="{% url 'plans' %}"
+            >
+                + Добавить подписку
+            </a>
+        </div>
+
+        {% for client in clients %}
+
+            <div class="subscription">
+
+                <div class="subscription-top">
+
+                    <div>
+
+                        <div class="subscription-name">
+                            {{ client.name }}
+                        </div>
+
+
+                        {% if client.expires_at %}
+                        <div class="subscription-meta"
+                             style="margin-top:8px;">
+                            📅 Действует до
+                            <strong>
+                                {{ client.expires_at|date:"d.m.Y" }}
+                            </strong>
+                        </div>
+                        {% endif %}
+
+
+                    </div>
+
+
+                    {% if client.subscription_is_active %}
+                        <span class="status status-active">
+                            Активна
+                        </span>
+                    {% else %}
+                        <span class="status status-disabled">
+                            Приостановлена
+                        </span>
+                    {% endif %}
+
+                </div>
+
+
+                    <form
+                        method="post"
+                        action="{% url 'renew_subscription' client.id %}"
+                        style="margin-top:14px;"
+                        onsubmit="return confirm('Создать заявку на продление этой подписки?');"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="button button-renew"
+                        >
+                            🔄 Продлить подписку
+                        </button>
+                    </form>
+
+
+                <div style="margin-top: 20px;">
+
+                    {% if client.subscription %}
+
+                        <div style="
+                            margin-bottom:14px;
+                            color:#6e6e73;
+                            font-size:14px;
+                            font-weight:600;
+                        ">
+                            Устройства
+                        </div>
+
+
+                        <div style="
+                            height:8px;
+                            background:#e5e5ea;
+                            border-radius:10px;
+                            overflow:hidden;
+                            margin-bottom:8px;
+                        ">
+                            <div style="
+                                height:100%;
+                                width:{% widthratio client.active_devices|length client.subscription.plan.device_limit 100 %}%;
+                                background:#007aff;
+                                border-radius:10px;
+                            ">
+                            </div>
+                        </div>
+
+
+                        <div style="
+                            font-size:13px;
+                            color:#6e6e73;
+                            margin-bottom:16px;
+                        ">
+                            {{ client.active_devices|length }}
+                            из
+                            {{ client.subscription.plan.device_limit }}
+                            устройств
+                        </div>
+
+                        {% for device in client.active_devices %}
+
+                            <div class="device-card"
+                                style="
+                                padding:12px 14px;
+                                margin-bottom:10px;
+                                border:1px solid #e5e5ea;
+                                border-radius:12px;
+                                background:#fff;
+                            ">
+
+                                <div style="
+                                    display:flex;
+                                    justify-content:space-between;
+                                    gap:12px;
+                                    align-items:center;
+                                    flex-wrap:wrap;
+                                ">
+
+                                    <div>
+                                        <strong style="font-size:16px;">
+                                            {{ device.name }}
+                                        </strong>
+
+                                        <div class="subtitle"
+                                             style="margin-top:3px;font-size:14px;">
+                                            {{ device.get_platform_display }}
+                                        </div>
+                                    </div>
+
+                                    <div class="device-actions">
+
+                                        <a
+                                            class="button button-secondary"
+                                            href="{% url 'device_connect' device.token %}"
+                                        >
+                                            Настроить
+                                        </a>
+
+
+                                        {% if device.platform == "windows" %}
+
+                                            <button
+                                                class="button button-primary"
+                                                id="windows-download-btn-{{ device.id }}"
+                                                onclick="downloadWindows('{{ device.token }}','{{ device.id }}')"
+                                                style="margin-left:6px;"
+                                            >
+                                                ⬇ Скачать клиент
+                                            </button>
+
+                                            <div
+                                                id="windows-download-status-{{ device.id }}"
+                                                class="subtitle"
+                                                style="display:none;margin-top:8px;"
+                                            ></div>
+
+                                        {% endif %}
+
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'remove_device' device.id %}"
+                                            style="display:inline-block; margin-left:6px;"
+                                            onsubmit="return confirm('Отвязать устройство «{{ device.name|escapejs }}»? После отвязки установленное на нём подключение перестанет работать.');"
+                                        >
+                                            {% csrf_token %}
+
+                                            <button
+                                                type="submit"
+                                                class="button button-secondary"
+                                            >
+                                                Отвязать
+                                            </button>
+                                        </form>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% empty %}
+                            <div class="subtitle"
+                                 style="margin-bottom:16px;">
+                                Устройства ещё не добавлены.
+                            </div>
+                        {% endfor %}
+
+
+                        {% if not client.subscription_is_active %}
+
+                            <div class="subtitle" style="
+                                margin-top:16px;
+                                padding:14px 16px;
+                                background:#fff3cd;
+                                border-radius:14px;
+                            ">
+                                Подписка неактивна.
+                                Для подключения устройств продлите подписку.
+                            </div>
+
+                        {% elif client.active_devices|length < client.subscription.plan.device_limit %}
+
+                        <details style="margin-top:16px;">
+
+                            <summary
+                                class="button button-primary"
+                                style="
+                                    display:inline-block;
+                                    cursor:pointer;
+                                    list-style:none;
+                                "
+                            >
+                                + Добавить устройство
+                            </summary>
+
+                            <form
+                                method="post"
+                                action="{% url 'add_device' client.id %}"
+                                style="
+                                    margin-top:16px;
+                                    padding:16px;
+                                    background:#f7f7f9;
+                                    border-radius:14px;
+                                "
+                            >
+                                {% csrf_token %}
+
+                                <div style="margin-bottom:12px;">
+                                    <label>
+                                        <strong>Название устройства</strong>
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        maxlength="100"
+                                        required
+                                        placeholder="Например: Мой iPhone"
+                                        style="
+                                            display:block;
+                                            width:100%;
+                                            box-sizing:border-box;
+                                            margin-top:6px;
+                                            padding:12px;
+                                            border:1px solid #d1d1d6;
+                                            border-radius:10px;
+                                        "
+                                    >
+                                </div>
+
+                                <div style="margin-bottom:14px;">
+                                    <label>
+                                        <strong>Тип устройства</strong>
+                                    </label>
+
+                                    <select
+                                        name="platform"
+                                        required
+                                        style="
+                                            display:block;
+                                            width:100%;
+                                            box-sizing:border-box;
+                                            margin-top:6px;
+                                            padding:12px;
+                                            border:1px solid #d1d1d6;
+                                            border-radius:10px;
+                                            background:white;
+                                        "
+                                    >
+                                        <option value="ios">
+                                            iPhone / iPad
+                                        </option>
+
+                                        <option value="android">
+                                            Android
+                                        </option>
+
+                                        <option value="windows">
+                                            Windows
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    class="button button-primary"
+                                >
+                                    Создать устройство
+                                </button>
+
+                            </form>
+
+                        </details>
+
+                        {% else %}
+
+                            <div style="margin-top:16px;">
+
+                                <button
+                                    type="button"
+                                    class="button button-secondary"
+                                    disabled
+                                    style="
+                                        opacity:.55;
+                                        cursor:not-allowed;
+                                    "
+                                >
+                                    + Добавить устройство
+                                </button>
+
+                                <div style="
+                                    margin-top:12px;
+                                    padding:14px 16px;
+                                    background:#f2f2f7;
+                                    border-radius:14px;
+                                ">
+                                    <strong>
+                                        Все доступные места заняты:
+                                        {{ client.active_devices|length }}
+                                        из
+                                        {{ client.subscription.plan.device_limit }}
+                                    </strong>
+
+                                    <div class="subtitle"
+                                         style="margin-top:6px;">
+                                        Чтобы подключить другое устройство,
+                                        сначала отвяжите одно из текущих.
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endif %}
+
+
+
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div class="empty">
+                <div class="empty-icon">⚡</div>
+
+                <h2>У вас пока нет подписок</h2>
+
+                <p class="subtitle">
+                    Выберите тариф и создайте первое
+                    подключение.
+                </p>
+
+                <a
+                    class="button button-primary"
+                    href="{% url 'plans' %}"
+                    style="margin-top: 20px;"
+                >
+                    Выбрать тариф
+                </a>
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<script>
+
+function downloadWindows(token, id) {
+
+    const btn = document.getElementById(
+        "windows-download-btn-" + id
+    );
+
+    const status = document.getElementById(
+        "windows-download-status-" + id
+    );
+
+
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Подготовка клиента...";
+
+
+    status.style.display = "block";
+    status.innerHTML = "Создание персонального клиента...";
+
+
+    fetch(
+        "/device/" + token + "/windows/"
+    )
+    .then(function(response){
+
+        return response.json();
+
+    })
+    .then(function(data){
+
+
+        if (data.url) {
+
+
+            status.innerHTML =
+                "⬇ Скачивание клиента...";
+
+
+            window.location.href = data.url;
+
+
+            setTimeout(function(){
+
+                window.location.reload();
+
+            },3000);
+
+
+        }
+        else {
+
+
+            status.innerHTML =
+                "Ошибка подготовки клиента";
+
+            btn.disabled = false;
+
+        }
+
+
+    })
+    .catch(function(){
+
+
+        status.innerHTML =
+            "Ошибка загрузки";
+
+        btn.disabled = false;
+
+
+    });
+
+}
+
+</script>
+
+
+{% endblock %}

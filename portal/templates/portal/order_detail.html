@@ -1,0 +1,190 @@
+{% extends "portal/account_base.html" %}
+
+{% block title %}Заказ №{{ order.id }} — Karion{% endblock %}
+
+{% block content %}
+<div class="page">
+
+    <div class="cabinet-header">
+        <h1>Заказ №{{ order.id }}</h1>
+
+        <p class="subtitle">
+            Информация о вашей заявке.
+        </p>
+    </div>
+
+    <div class="card">
+
+        <div class="subscription">
+
+            <div class="subscription-top">
+
+                <div>
+                    <div class="subscription-name">
+                        Доступ к IT-сервису Karion — {{ order.duration_days }} дней
+                    </div>
+
+                    <div class="subscription-meta">
+                        Срок:
+                        <strong>
+                            {{ order.duration_days }} дней
+                        </strong>
+                        <br>
+
+                        Устройств:
+                        <strong>
+                            до {{ order.device_limit }}
+                        </strong>
+                        <br>
+
+                        Статус:
+                        <strong>
+                            {{ order.get_status_display }}
+                        </strong>
+                    </div>
+                </div>
+
+                <div style="
+                    font-size: 28px;
+                    font-weight: 800;
+                    white-space: nowrap;
+                ">
+                    {{ order.amount|floatformat:0 }} ₽
+                </div>
+
+            </div>
+
+        </div>
+
+        {% if order.status == "pending" %}
+
+            <div style="
+                margin-top: 24px;
+                padding: 22px;
+                border-radius: 16px;
+                background: rgba(255,255,255,.05);
+            ">
+                <div style="
+                    font-size: 20px;
+                    font-weight: 800;
+                    margin-bottom: 10px;
+                ">
+                    ✓ Заявка принята
+                </div>
+
+                <div class="subtitle">
+                    Заказ готов к онлайн-оплате.
+                    После подтверждения платежа подписка
+                    будет активирована автоматически.
+                </div>
+
+                {% if not order.payment_expires_at or order.payment_expires_at > current_time %}
+                <form
+                    method="post"
+                    action="{% url 'pay_order' order.id %}"
+                    style="margin-top: 20px;"
+                >
+                    {% csrf_token %}
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Оплатить онлайн — {{ order.amount|floatformat:2 }} ₽
+                    </button>
+                </form>
+                {% else %}
+                <div class="subtitle" style="margin-top: 16px;">
+                    Срок оплаты заказа истёк.
+                </div>
+                {% endif %}
+
+                <div style="
+                    margin-top: 16px;
+                    font-size: 14px;
+                    opacity: .75;
+                ">
+                    После подтверждения оплаты подписка
+                    будет активирована автоматически и
+                    появится в личном кабинете.
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <form
+                        method="post"
+                        action="{% url 'cancel_order' order.id %}"
+                        style="margin: 0;"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            class="button button-secondary"
+                            type="submit"
+                        >
+                            Удалить заявку
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+        {% elif order.status == "paid" %}
+
+            <div style="
+                margin-top: 24px;
+                padding: 22px;
+                border-radius: 16px;
+                background: rgba(255,255,255,.05);
+            ">
+                <div style="
+                    font-size: 20px;
+                    font-weight: 800;
+                    margin-bottom: 10px;
+                ">
+                    {% if order.fulfillment_status == "completed" %}
+                        ✓ Подписка активирована
+                    {% elif order.fulfillment_status == "error" %}
+                        Оплата получена. Требуется проверка активации
+                    {% else %}
+                        ✓ Оплата подтверждена
+                    {% endif %}
+                </div>
+
+                <div class="subtitle">
+                    {% if order.fulfillment_status == "completed" %}
+                        Подключение доступно в вашем личном кабинете.
+                    {% elif order.fulfillment_status == "error" %}
+                        Платёж успешно получен, но при активации возникла ошибка.
+                        Обратитесь в поддержку. Повторно оплачивать заказ не нужно.
+                    {% else %}
+                        Подключение активируется автоматически.
+                        Обычно это занимает около минуты.
+                        Обновите страницу немного позже.
+                    {% endif %}
+                </div>
+
+                <a
+                    class="button button-primary"
+                    href="{% url 'cabinet' %}"
+                    style="margin-top: 18px;"
+                >
+                    Перейти в личный кабинет
+                </a>
+            </div>
+
+        {% endif %}
+
+        <div style="margin-top: 24px;">
+
+            <a
+                class="button button-secondary"
+                href="{% url 'plans' %}"
+            >
+                ← Вернуться к тарифам
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

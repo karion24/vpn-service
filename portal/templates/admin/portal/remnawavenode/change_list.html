@@ -1,0 +1,16 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+
+<li>
+    <a
+        href="{% url 'admin:portal_remnawavenode_create' %}"
+        class="addlink"
+    >
+        Создать ноду
+    </a>
+</li>
+
+{{ block.super }}
+
+{% endblock %}

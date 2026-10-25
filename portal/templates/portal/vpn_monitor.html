@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+>
+<meta http-equiv="refresh" content="30">
+
+<title>Karion — мониторинг</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f4f6f9;
+    color: #172033;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+.page {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding: 30px 24px 60px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+h1 {
+    margin: 0 0 5px;
+    font-size: 28px;
+}
+
+.subtitle {
+    color: #667085;
+    font-size: 13px;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 15px;
+    border: 1px solid #d0d5dd;
+    border-radius: 9px;
+    background: white;
+    color: #344054;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background: #f9fafb;
+}
+
+.system {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 17px 20px;
+    margin-bottom: 18px;
+    border-radius: 13px;
+    border: 1px solid;
+}
+
+.system.good {
+    background: #ecfdf3;
+    border-color: #abefc6;
+}
+
+.system.warning {
+    background: #fffaeb;
+    border-color: #fedf89;
+}
+
+.system.danger {
+    background: #fef3f2;
+    border-color: #fecdca;
+}
+
+.system-dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.good .system-dot {
+    background: #17b26a;
+}
+
+.warning .system-dot {
+    background: #f79009;
+}
+
+.danger .system-dot {
+    background: #f04438;
+}
+
+.system-title {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.system-text {
+    margin-top: 2px;
+    color: #667085;
+    font-size: 13px;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.summary-card,
+.node,
+.panel {
+    background: white;
+    border: 1px solid #e4e7ec;
+    border-radius: 14px;
+    box-shadow:
+        0 1px 2px rgba(16, 24, 40, .04);
+}
+
+.summary-card {
+    padding: 18px;
+}
+
+.summary-value {
+    font-size: 27px;
+    line-height: 1.1;
+    font-weight: 750;
+}
+
+.summary-label {
+    margin-top: 6px;
+    color: #667085;
+    font-size: 12px;
+}
+
+.nodes {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.node {
+    padding: 18px;
+    border-top-width: 4px;
+}
+
+.node.up {
+    border-top-color: #17b26a;
+}
+
+.node.down {
+    border-top-color: #f04438;
+}
+
+.node.warning,
+.node.recovery {
+    border-top-color: #f79009;
+}
+
+.node-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 17px;
+}
+
+.node-name {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.node-address {
+    margin-top: 4px;
+    color: #667085;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.badge {
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.badge.up {
+    color: #067647;
+    background: #dcfae6;
+}
+
+.badge.down {
+    color: #b42318;
+    background: #fee4e2;
+}
+
+.badge.warning,
+.badge.recovery {
+    color: #b54708;
+    background: #fef0c7;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f2f4f7;
+    font-size: 13px;
+}
+
+.row:last-child {
+    border-bottom: 0;
+}
+
+.label {
+    color: #667085;
+}
+
+.value {
+    font-weight: 600;
+    text-align: right;
+}
+
+.good-text {
+    color: #067647;
+}
+
+.bad-text {
+    color: #b42318;
+}
+
+.warning-text {
+    color: #b54708;
+}
+
+.error {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #fef3f2;
+    color: #b42318;
+    font-size: 11px;
+    word-break: break-word;
+}
+
+.panel {
+    padding: 18px;
+    margin-bottom: 17px;
+}
+
+.panel h2 {
+    margin: 0 0 15px;
+    font-size: 16px;
+}
+
+.fp-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+    gap: 13px;
+}
+
+.fp-item {
+    padding: 13px;
+    border-radius: 10px;
+    background: #f9fafb;
+}
+
+.fp-item .label {
+    font-size: 11px;
+    margin-bottom: 6px;
+}
+
+.fp-item .value {
+    text-align: left;
+}
+
+.alert {
+    margin-bottom: 17px;
+    padding: 15px 18px;
+    border-radius: 12px;
+    font-size: 13px;
+}
+
+.alert.warning {
+    background: #fffaeb;
+    border: 1px solid #fedf89;
+    color: #93370d;
+}
+
+.alert.danger {
+    background: #fef3f2;
+    border: 1px solid #fecdca;
+    color: #b42318;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 9px 8px;
+    border-bottom: 1px solid #eaecf0;
+    text-align: left;
+    font-size: 12px;
+}
+
+th {
+    color: #667085;
+    font-weight: 600;
+}
+
+.empty {
+    color: #667085;
+    font-size: 13px;
+}
+
+.footer {
+    margin-top: 18px;
+    color: #667085;
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+    .summary {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .nodes {
+        grid-template-columns: 1fr;
+    }
+
+    .fp-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .page {
+        padding: 20px 12px 40px;
+    }
+
+    .header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .summary,
+    .fp-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="header">
+        <div>
+            <h1>Karion</h1>
+            <div class="subtitle">
+                Мониторинг VPN-узлов и Reality
+            </div>
+        </div>
+
+        <div class="actions">
+            <a
+                class="button"
+                href="/monitor/"
+            >
+                ↻ Обновить
+            </a>
+
+            <a
+                class="button"
+                href="/admin/"
+            >
+                Django Admin
+            </a>
+        </div>
+    </div>
+
+
+    <div class="system {{ system_state }}">
+        <div class="system-dot"></div>
+
+        <div>
+            <div class="system-title">
+                {{ system_title }}
+            </div>
+
+            <div class="system-text">
+                {{ system_text }}
+            </div>
+        </div>
+    </div>
+
+
+    {% if not health.available %}
+        <div class="alert danger">
+            Healthcheck недоступен:
+            {{ health.error }}
+        </div>
+    {% endif %}
+
+
+    {% if health.stale and health.available %}
+        <div class="alert warning">
+            Данные healthcheck устарели.
+            Последнее обновление:
+            {{ health.updated_at_display }}
+        </div>
+    {% endif %}
+
+
+    {% if fingerprint_alert %}
+        <div class="alert warning">
+            <strong>
+                Обнаружена возможная проблема
+                Reality fingerprint.
+            </strong>
+            Система выполняет дополнительную
+            диагностику альтернативных fingerprints.
+        </div>
+    {% endif %}
+
+
+    <div class="summary">
+
+        <div class="summary-card">
+            <div class="summary-value">
+                {{ up_nodes }}/{{ total_nodes }}
+            </div>
+
+            <div class="summary-label">
+                VPN-узлов UP
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <div class="summary-value">
+                {{ down_nodes }}
+            </div>
+
+            <div class="summary-label">
+                VPN-узлов DOWN
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <div class="summary-value">
+                {{ subscription_nodes }}/{{ total_nodes }}
+            </div>
+
+            <div class="summary-label">
+                Узлов в новых подписках
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <div class="summary-value">
+                {{ health.fingerprint.current|default:"—" }}
+            </div>
+
+            <div class="summary-label">
+                Reality fingerprint
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="nodes">
+
+        {% for node in health.nodes %}
+
+            <div class="node {{ node.display_state }}">
+
+                <div class="node-head">
+
+                    <div>
+                        <div class="node-name">
+                            {{ node.code }}
+                            ·
+                            {{ node.name }}
+                        </div>
+
+                        <div class="node-address">
+                            {{ node.address }}
+                        </div>
+                    </div>
+
+                    <span
+                        class="badge {{ node.display_state }}"
+                    >
+                        {{ node.display_label }}
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+                    <span class="label">
+                        VPN
+                    </span>
+
+                    <span class="
+                        value
+                        {% if node.vpn_status == 'UP' %}
+                            good-text
+                        {% else %}
+                            bad-text
+                        {% endif %}
+                    ">
+                        {{ node.vpn_status }}
+                    </span>
+                </div>
+
+
+                <div class="row">
+                    <span class="label">
+                        Remnawave
+                    </span>
+
+                    <span class="
+                        value
+                        {% if node.node_connected %}
+                            good-text
+                        {% else %}
+                            bad-text
+                        {% endif %}
+                    ">
+                        {% if node.node_connected %}
+                            CONNECTED
+                        {% else %}
+                            DISCONNECTED
+                        {% endif %}
+                    </span>
+                </div>
+
+
+                <div class="row">
+                    <span class="label">
+                        Exit IP
+                    </span>
+
+                    <span class="value">
+                        {{ node.exit_ip|default:"—" }}
+                    </span>
+                </div>
+
+
+                <div class="row">
+                    <span class="label">
+                        Latency
+                    </span>
+
+                    <span class="value">
+                        {% if node.latency_ms != None %}
+                            {{ node.latency_ms }} ms
+                        {% else %}
+                            —
+                        {% endif %}
+                    </span>
+                </div>
+
+
+                <div class="row">
+                    <span class="label">
+                        Failures
+                    </span>
+
+                    <span class="
+                        value
+                        {% if node.fail_count %}
+                            warning-text
+                        {% endif %}
+                    ">
+                        {{ node.fail_count }}/3
+                    </span>
+                </div>
+
+
+                <div class="row">
+                    <span class="label">
+                        Recovery
+                    </span>
+
+                    <span class="
+                        value
+                        {% if node.success_count %}
+                            warning-text
+                        {% endif %}
+                    ">
+                        {{ node.success_count }}/2
+                    </span>
+                </div>
+
+
+                <div class="row">
+                    <span class="label">
+                        Последняя проверка
+                    </span>
+
+                    <span class="value">
+                        {{ node.last_check_display }}
+                    </span>
+                </div>
+
+
+                {% if node.error %}
+                    <div class="error">
+                        {{ node.error }}
+                    </div>
+                {% endif %}
+
+            </div>
+
+        {% empty %}
+
+            <div class="panel">
+                Нет данных по VPN-узлам.
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <div class="panel">
+
+        <h2>Reality fingerprint</h2>
+
+        <div class="fp-grid">
+
+            <div class="fp-item">
+                <div class="label">
+                    Текущий
+                </div>
+
+                <div class="value">
+                    {{ health.fingerprint.current|default:"—" }}
+                </div>
+            </div>
+
+
+            <div class="fp-item">
+                <div class="label">
+                    Кандидат
+                </div>
+
+                <div class="value">
+                    {{ health.fingerprint.candidate|default:"—" }}
+                </div>
+            </div>
+
+
+            <div class="fp-item">
+                <div class="label">
+                    Подтверждения
+                </div>
+
+                <div class="value">
+                    {{ health.fingerprint.candidate_count|default:0 }}/2
+                </div>
+            </div>
+
+
+            <div class="fp-item">
+                <div class="label">
+                    Последняя смена
+                </div>
+
+                <div class="value">
+                    {{ health.fingerprint.last_change_display }}
+                </div>
+            </div>
+
+
+            <div class="fp-item">
+                <div class="label">
+                    Cooldown до
+                </div>
+
+                <div class="value">
+                    {{ health.fingerprint.cooldown_until_display }}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <h2>История смен fingerprint</h2>
+
+        {% if health.fingerprint.history %}
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Время</th>
+                        <th>Было</th>
+                        <th>Стало</th>
+                        <th>Подтвердили узлы</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in health.fingerprint.history reversed %}
+
+                        <tr>
+                            <td>
+                                {{ item.at_display }}
+                            </td>
+
+                            <td>
+                                {{ item.from }}
+                            </td>
+
+                            <td>
+                                {{ item.to }}
+                            </td>
+
+                            <td>
+                                {{ item.confirmed_nodes|join:", " }}
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        {% else %}
+
+            <div class="empty">
+                Автоматических смен fingerprint
+                ещё не было.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="footer">
+        Последнее обновление healthcheck:
+        {{ health.updated_at_display }}
+
+        {% if health.age_seconds != None %}
+            · {{ health.age_seconds }} сек. назад
+        {% endif %}
+
+        · Автообновление каждые 30 секунд.
+    </div>
+
+</div>
+
+</body>
+</html>

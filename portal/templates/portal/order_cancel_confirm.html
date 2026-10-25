@@ -1,0 +1,62 @@
+{% extends "portal/account_base.html" %}
+
+{% block title %}Удаление заявки — Karion{% endblock %}
+
+{% block content %}
+<div class="page">
+
+    <div class="cabinet-header">
+        <h1>Удалить заявку?</h1>
+    </div>
+
+    <div class="card">
+
+        <div class="subscription">
+
+            <div class="subscription-name">
+                Заказ №{{ order.id }}
+            </div>
+
+            <div class="subtitle" style="margin-top: 12px;">
+                Вы уверены, что хотите удалить эту заявку?
+            </div>
+
+            <div style="margin-top: 24px;">
+
+                <form
+                    method="post"
+                    action="{% url 'cancel_order' order.id %}"
+                    style="display: inline;"
+                >
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="confirmed"
+                        value="yes"
+                    >
+
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Да, удалить
+                    </button>
+                </form>
+
+                <a
+                    class="button button-secondary"
+                    href="{% url 'order_detail' order.id %}"
+                    style="margin-left: 8px;"
+                >
+                    Нет, оставить
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

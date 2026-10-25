@@ -1,0 +1,89 @@
+{% extends "portal/account_base.html" %}
+
+{% block title %}Тарифы — Karion{% endblock %}
+
+{% block content %}
+<div class="page">
+
+    <div class="cabinet-header">
+        <h1>Выберите тариф</h1>
+
+        <p class="subtitle">
+            Выберите подходящий вариант для нового подключения.
+        </p>
+    </div>
+
+    <div class="card">
+
+        {% for plan in plans %}
+
+            <div class="subscription">
+
+                <div class="subscription-top">
+
+                    <div>
+                        <div class="subscription-name">
+                            Доступ к IT-сервису Karion — {{ plan.duration_days }} дней
+                        </div>
+
+                        <div class="subscription-meta">
+                            {{ plan.duration_days }} дней
+                            <br>
+                            До {{ plan.device_limit }} устройств
+                        </div>
+                    </div>
+
+                    <div style="
+                        font-size: 26px;
+                        font-weight: 800;
+                        white-space: nowrap;
+                    ">
+                        {{ plan.price|floatformat:0 }} ₽
+                    </div>
+
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <form
+                        method="post"
+                        action="{% url 'create_order' plan.id %}"
+                        style="margin: 0;"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                        >
+                            Подключить
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div class="empty">
+                <h2>Нет доступных тарифов</h2>
+
+                <p class="subtitle">
+                    Активные тарифы пока не настроены.
+                </p>
+            </div>
+
+        {% endfor %}
+
+        <div style="margin-top: 24px;">
+            <a
+                class="button button-secondary"
+                href="{% url 'cabinet' %}"
+            >
+                ← Назад в кабинет
+            </a>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

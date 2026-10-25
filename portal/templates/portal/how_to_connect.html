@@ -1,0 +1,860 @@
+{% extends "portal/account_base.html" %}
+
+{% block title %}Как подключиться?{% endblock %}
+
+{% block content %}
+
+<style>
+    .howto-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 44px 20px 70px;
+    }
+
+    .howto-hero {
+        text-align: center;
+        margin-bottom: 38px;
+    }
+
+    .howto-hero h1 {
+        font-size: 42px;
+        margin-bottom: 12px;
+    }
+
+    .howto-lead {
+        color: #6e6e73;
+        font-size: 18px;
+        line-height: 1.55;
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
+    .steps {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+        margin-bottom: 38px;
+    }
+
+    .step {
+        background: #fff;
+        border-radius: 18px;
+        padding: 20px 15px;
+        text-align: center;
+        box-shadow: 0 6px 24px rgba(0,0,0,.05);
+    }
+
+    .step-number {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #007aff;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+        font-weight: 750;
+    }
+
+    .step-title {
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    .section-title {
+        text-align: center;
+        margin: 42px 0 20px;
+    }
+
+    .platform-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .platform-tab {
+        border: 1px solid #dedee3;
+        background: #fff;
+        border-radius: 17px;
+        padding: 18px;
+        cursor: pointer;
+        text-align: center;
+        font: inherit;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .platform-tab.active {
+        background: #007aff;
+        border-color: #007aff;
+        color: #fff;
+    }
+
+    .platform-panel {
+        display: none;
+    }
+
+    .platform-panel.active {
+        display: block;
+    }
+
+    .guide-card {
+        background: #fff;
+        border-radius: 22px;
+        padding: 28px;
+        box-shadow: 0 8px 30px rgba(0,0,0,.06);
+    }
+
+    .guide-step {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        align-items: center;
+        padding: 26px 0;
+        border-bottom: 1px solid #ececf0;
+    }
+
+    .guide-step:last-child {
+        border-bottom: 0;
+    }
+
+    .guide-step:nth-child(even) .guide-visual {
+        order: -1;
+    }
+
+    .guide-number {
+        color: #007aff;
+        font-weight: 750;
+        font-size: 14px;
+        margin-bottom: 7px;
+    }
+
+    .guide-step h3 {
+        margin: 0 0 9px;
+        font-size: 21px;
+    }
+
+    .guide-step p {
+        color: #6e6e73;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .guide-visual {
+        background: #f5f5f7;
+        border-radius: 20px;
+        padding: 20px;
+        min-height: 190px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mock-phone {
+        width: 185px;
+        background: #fff;
+        border: 7px solid #1d1d1f;
+        border-radius: 28px;
+        padding: 25px 12px 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,.12);
+    }
+
+    .mock-screen-title {
+        font-weight: 750;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    .mock-button {
+        background: #007aff;
+        color: #fff;
+        border-radius: 10px;
+        padding: 10px 8px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 9px;
+    }
+
+    .mock-row {
+        background: #f2f2f7;
+        border-radius: 9px;
+        padding: 9px;
+        margin-top: 7px;
+        font-size: 12px;
+    }
+
+    .mock-window {
+        width: 100%;
+        max-width: 390px;
+        background: #fff;
+        border: 1px solid #d8d8dc;
+        border-radius: 13px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0,0,0,.1);
+    }
+
+    .mock-window-top {
+        height: 30px;
+        background: #ededf2;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 10px;
+    }
+
+    .mock-dot {
+        width: 8px;
+        height: 8px;
+        background: #c7c7cc;
+        border-radius: 50%;
+    }
+
+    .mock-window-body {
+        padding: 20px;
+    }
+
+    .mode-card {
+        border: 1px solid #e2e2e7;
+        border-radius: 11px;
+        padding: 11px;
+        margin-top: 9px;
+        font-size: 13px;
+    }
+
+    .mode-card strong {
+        display: block;
+        margin-bottom: 3px;
+    }
+
+    .mode-info {
+        margin-top: 22px;
+        padding: 20px;
+        background: #eef5ff;
+        border-radius: 16px;
+    }
+
+    .mode-info h3 {
+        margin: 0 0 10px;
+    }
+
+    .mode-info p {
+        margin: 5px 0;
+        line-height: 1.55;
+        color: #45454a;
+    }
+
+    .final-card {
+        text-align: center;
+        margin-top: 36px;
+        background: #fff;
+        border-radius: 22px;
+        padding: 32px;
+        box-shadow: 0 8px 30px rgba(0,0,0,.06);
+    }
+
+    .final-card h2 {
+        font-size: 26px;
+        margin-bottom: 9px;
+    }
+
+    .final-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 22px;
+    }
+
+    .final-actions .button {
+        min-width: 180px;
+        min-height: 48px;
+        font-size: 16px;
+    }
+
+    @media (max-width: 760px) {
+        .howto-page {
+            padding-top: 28px;
+        }
+
+        .howto-hero h1 {
+            font-size: 34px;
+        }
+
+        .steps {
+            grid-template-columns: 1fr;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            text-align: left;
+            gap: 13px;
+            padding: 15px;
+        }
+
+        .step-number {
+            margin: 0;
+            flex: 0 0 38px;
+        }
+
+        .platform-tabs {
+            grid-template-columns: 1fr;
+        }
+
+        .guide-card {
+            padding: 20px;
+        }
+
+        .guide-step {
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .guide-step:nth-child(even) .guide-visual {
+            order: initial;
+        }
+
+        .final-actions {
+            flex-direction: column;
+        }
+
+        .final-actions .button {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="howto-page">
+
+    <div class="howto-hero">
+        <h1>Как подключиться?</h1>
+
+        <p class="howto-lead">
+            От регистрации до готового подключения —
+            несколько простых шагов.
+        </p>
+    </div>
+
+
+    <div class="steps">
+
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-title">Зарегистрируйтесь</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-title">Выберите тариф</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-title">Оплатите подписку</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-title">Добавьте устройство</div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-title">Подключитесь</div>
+        </div>
+
+    </div>
+
+
+    <h2 class="section-title">
+        Выберите ваше устройство
+    </h2>
+
+
+    <div class="platform-tabs">
+
+        <button
+            class="platform-tab active"
+            type="button"
+            data-platform="ios">
+            📱 iPhone / iPad
+        </button>
+
+        <button
+            class="platform-tab"
+            type="button"
+            data-platform="android">
+            🤖 Android
+        </button>
+
+        <button
+            class="platform-tab"
+            type="button"
+            data-platform="windows">
+            💻 Windows
+        </button>
+
+    </div>
+
+
+    <!-- iPhone -->
+    <div
+        id="platform-ios"
+        class="platform-panel active">
+
+        <div class="guide-card">
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 1</div>
+                    <h3>Зарегистрируйтесь и оплатите подписку</h3>
+                    <p>
+                        Создайте аккаунт, войдите в личный кабинет,
+                        выберите подходящий тариф и оформите подписку.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-phone">
+                        <div class="mock-screen-title">
+                            Личный кабинет
+                        </div>
+                        <div class="mock-row">
+                            Подписка
+                        </div>
+                        <div class="mock-button">
+                            Выбрать тариф
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 2</div>
+                    <h3>Добавьте iPhone или iPad</h3>
+                    <p>
+                        В личном кабинете нажмите
+                        «Добавить устройство», укажите удобное название
+                        и выберите iPhone / iPad.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-phone">
+                        <div class="mock-screen-title">
+                            Новое устройство
+                        </div>
+                        <div class="mock-row">
+                            Мой iPhone
+                        </div>
+                        <div class="mock-row">
+                            📱 iPhone / iPad
+                        </div>
+                        <div class="mock-button">
+                            Добавить
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 3</div>
+                    <h3>Добавьте подключение в INCY</h3>
+                    <p>
+                        После создания устройства откроется страница
+                        подключения. Нажмите «Добавить в INCY».
+                        Подключение будет передано в приложение
+                        автоматически.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-phone">
+                        <div class="mock-screen-title">
+                            Подключение
+                        </div>
+                        <div class="mock-row">
+                            ⚡ Karion VPN
+                        </div>
+                        <div class="mock-button">
+                            Добавить в INCY
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 4</div>
+                    <h3>Подключите VPN</h3>
+                    <p>
+                        Откройте INCY, выберите добавленное подключение
+                        и включите VPN. При первом запуске iPhone может
+                        запросить разрешение на добавление VPN-конфигурации.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-phone">
+                        <div class="mock-screen-title">
+                            INCY
+                        </div>
+                        <div class="mock-row">
+                            Karion VPN
+                        </div>
+                        <div class="mock-button">
+                            Подключить
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Android -->
+    <div
+        id="platform-android"
+        class="platform-panel">
+
+        <div class="guide-card">
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 1</div>
+                    <h3>Зарегистрируйтесь и оплатите подписку</h3>
+                    <p>
+                        Создайте аккаунт, войдите в личный кабинет,
+                        выберите тариф и оформите подписку.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-phone">
+                        <div class="mock-screen-title">
+                            Личный кабинет
+                        </div>
+                        <div class="mock-row">
+                            Подписка
+                        </div>
+                        <div class="mock-button">
+                            Выбрать тариф
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 2</div>
+                    <h3>Добавьте Android-устройство</h3>
+                    <p>
+                        Нажмите «Добавить устройство», задайте ему
+                        название и выберите Android.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-phone">
+                        <div class="mock-screen-title">
+                            Новое устройство
+                        </div>
+                        <div class="mock-row">
+                            Мой Android
+                        </div>
+                        <div class="mock-row">
+                            🤖 Android
+                        </div>
+                        <div class="mock-button">
+                            Добавить
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 3</div>
+                    <h3>Добавьте подключение в INCY</h3>
+                    <p>
+                        На странице созданного устройства нажмите
+                        «Добавить в INCY». Персональные параметры
+                        подключения уже сформированы системой.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-phone">
+                        <div class="mock-screen-title">
+                            Подключение
+                        </div>
+                        <div class="mock-row">
+                            ⚡ Karion VPN
+                        </div>
+                        <div class="mock-button">
+                            Добавить в INCY
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 4</div>
+                    <h3>Включите VPN</h3>
+                    <p>
+                        Откройте INCY, выберите добавленное подключение
+                        и нажмите подключение VPN.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-phone">
+                        <div class="mock-screen-title">
+                            INCY
+                        </div>
+                        <div class="mock-row">
+                            Karion VPN
+                        </div>
+                        <div class="mock-button">
+                            Подключить
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Windows -->
+    <div
+        id="platform-windows"
+        class="platform-panel">
+
+        <div class="guide-card">
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 1</div>
+                    <h3>Зарегистрируйтесь и оплатите подписку</h3>
+                    <p>
+                        Создайте аккаунт, войдите в личный кабинет,
+                        выберите тариф и оформите подписку.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-window">
+                        <div class="mock-window-top">
+                            <span class="mock-dot"></span>
+                            <span class="mock-dot"></span>
+                            <span class="mock-dot"></span>
+                        </div>
+                        <div class="mock-window-body">
+                            <strong>Личный кабинет</strong>
+                            <div class="mock-button">
+                                Выбрать тариф
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 2</div>
+                    <h3>Добавьте компьютер</h3>
+                    <p>
+                        В личном кабинете нажмите «Добавить устройство»,
+                        укажите название компьютера и выберите Windows.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-window">
+                        <div class="mock-window-top">
+                            <span class="mock-dot"></span>
+                            <span class="mock-dot"></span>
+                            <span class="mock-dot"></span>
+                        </div>
+                        <div class="mock-window-body">
+                            <strong>Новое устройство</strong>
+                            <div class="mock-row">Мой компьютер</div>
+                            <div class="mock-row">💻 Windows</div>
+                            <div class="mock-button">Добавить</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 3</div>
+                    <h3>Скачайте персональный клиент</h3>
+                    <p>
+                        На странице подключения нажмите
+                        «Скачать Karion VPN для Windows».
+                        Система подготовит персональный клиент,
+                        в котором ваши профили уже настроены.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-window">
+                        <div class="mock-window-top">
+                            <span class="mock-dot"></span>
+                            <span class="mock-dot"></span>
+                            <span class="mock-dot"></span>
+                        </div>
+                        <div class="mock-window-body">
+                            <strong>
+                                Karion VPN для Windows
+                            </strong>
+                            <div class="mock-button">
+                                ⬇ Скачать
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 4</div>
+                    <h3>Запустите клиент</h3>
+                    <p>
+                        Распакуйте скачанный архив и запустите клиент.
+                        Все необходимые параметры подключения уже
+                        находятся внутри.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="guide-step">
+                <div>
+                    <div class="guide-number">ШАГ 5</div>
+                    <h3>Один раз включите Set system proxy</h3>
+                    <p>
+                        После первого запуска клиента включите
+                        <strong>Set system proxy</strong>.
+                        Это нужно сделать один раз при первоначальной
+                        настройке клиента на Windows.
+                    </p>
+                </div>
+
+                <div class="guide-visual">
+                    <div class="mock-window">
+                        <div class="mock-window-top">
+                            <span class="mock-dot"></span>
+                            <span class="mock-dot"></span>
+                            <span class="mock-dot"></span>
+                        </div>
+                        <div class="mock-window-body">
+                            <strong>Karion VPN</strong>
+                            <div class="mode-card">
+                                <strong>✓ Set system proxy</strong>
+                                Включите при первом запуске
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="final-card">
+
+        {% if request.user.is_authenticated %}
+
+            <h2>Всё готово к подключению</h2>
+
+            <p class="subtitle">
+                Вернитесь в личный кабинет для управления
+                подписками и устройствами.
+            </p>
+
+            <div class="final-actions">
+                <a
+                    class="button button-primary"
+                    href="{% url 'cabinet' %}">
+                    ← Вернуться в личный кабинет
+                </a>
+            </div>
+
+        {% else %}
+
+            <h2>Готовы подключиться?</h2>
+
+            <p class="subtitle">
+                Создайте аккаунт или войдите,
+                если вы уже зарегистрированы.
+            </p>
+
+            <div class="final-actions">
+
+                <a
+                    class="button button-primary"
+                    href="{% url 'register' %}">
+                    Регистрация
+                </a>
+
+                <a
+                    class="button button-secondary"
+                    href="{% url 'login' %}">
+                    Войти
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<script>
+document.querySelectorAll(".platform-tab").forEach(function(button) {
+
+    button.addEventListener("click", function() {
+
+        var platform = button.dataset.platform;
+
+        document.querySelectorAll(".platform-tab").forEach(function(item) {
+            item.classList.remove("active");
+        });
+
+        document.querySelectorAll(".platform-panel").forEach(function(item) {
+            item.classList.remove("active");
+        });
+
+        button.classList.add("active");
+
+        document
+            .getElementById("platform-" + platform)
+            .classList.add("active");
+    });
+
+});
+</script>
+
+{% endblock %}

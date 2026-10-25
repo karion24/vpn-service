@@ -1,0 +1,82 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Нода создана{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Главная</a>
+    &rsaquo;
+    <a href="{% url 'admin:portal_remnawavenode_changelist' %}">
+        Ноды Remnawave
+    </a>
+    &rsaquo; Нода создана
+</div>
+{% endblock %}
+
+{% block content %}
+
+<h1>Нода создана</h1>
+
+<div class="module">
+
+    <table>
+        <tr>
+            <th>Панель</th>
+            <td>{{ node.server.name }}</td>
+        </tr>
+
+        <tr>
+            <th>Название</th>
+            <td>{{ node.name }}</td>
+        </tr>
+
+        <tr>
+            <th>IP</th>
+            <td>{{ node.address }}</td>
+        </tr>
+
+        <tr>
+            <th>Страна</th>
+            <td>{{ node.country_code }}</td>
+        </tr>
+
+        <tr>
+            <th>Remnawave ID</th>
+            <td>{{ node.remnawave_id }}</td>
+        </tr>
+
+        <tr>
+            <th>Remnawave UUID</th>
+            <td>{{ node.remnawave_uuid }}</td>
+        </tr>
+
+        <tr>
+            <th>Host UUID</th>
+            <td>{{ node.host_uuid }}</td>
+        </tr>
+    </table>
+
+</div>
+
+<h2>Установка на новый Ubuntu-сервер</h2>
+
+<p>
+    Скопируйте скрипт целиком и выполните его от root
+    на новом сервере.
+</p>
+
+<textarea
+    style="width:100%;height:500px;font-family:monospace;"
+    readonly
+>{{ install_script }}</textarea>
+
+<br><br>
+
+<a
+    href="{% url 'admin:portal_remnawavenode_changelist' %}"
+    class="button"
+>
+    Вернуться к нодам
+</a>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+
+    {% if original and original.pk %}
+
+        <li>
+            <a href="{% url 'admin:portal_remnawavenode_install_script' original.pk %}">
+                Скачать install.sh
+            </a>
+        </li>
+
+        <li>
+            <a href="{% url 'admin:portal_remnawavenode_reconcile' original.pk %}">
+                Восстановить / проверить
+            </a>
+        </li>
+
+        <li>
+            <a href="{% url 'admin:portal_remnawavenode_lifecycle' original.pk %}">
+                {% if original.is_enabled %}
+                    Отключить ноду
+                {% else %}
+                    Включить ноду
+                {% endif %}
+            </a>
+        </li>
+
+        <li>
+            <a href="{% url 'admin:portal_remnawavenode_remote_delete' original.pk %}"
+               style="background:#ba2121;color:white;">
+                Удалить ноду
+            </a>
+        </li>
+
+    {% endif %}
+
+    {{ block.super }}
+
+{% endblock %}

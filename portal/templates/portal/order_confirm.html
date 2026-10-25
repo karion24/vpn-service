@@ -1,0 +1,70 @@
+{% extends "portal/account_base.html" %}
+
+{% block title %}Подтверждение — Karion{% endblock %}
+
+{% block content %}
+<div class="page">
+
+    <div class="cabinet-header">
+        <h1>Добавить ещё одну подписку?</h1>
+    </div>
+
+    <div class="card">
+
+        <div class="subscription">
+
+            <div class="subscription-name">
+                У вас уже есть
+                {% if has_active_subscription and has_pending_order %}
+                    активная подписка и неоплаченная заявка.
+                {% elif has_active_subscription %}
+                    активная подписка.
+                {% else %}
+                    неоплаченная заявка.
+                {% endif %}
+            </div>
+
+            <div class="subtitle" style="margin-top: 12px;">
+                Вы действительно хотите создать
+                ещё одну подписку?
+            </div>
+
+            <div style="margin-top: 24px;">
+
+                <form
+                    method="post"
+                    action="{% url 'create_order' plan.id %}"
+                    style="display: inline;"
+                >
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="confirmed"
+                        value="yes"
+                    >
+
+                    <button
+                        class="button button-primary"
+                        type="submit"
+                    >
+                        Да, создать ещё одну
+                    </button>
+                </form>
+
+                <a
+                    class="button button-secondary"
+                    href="{% url 'cabinet' %}"
+                    style="margin-left: 8px;"
+                >
+                    Отмена
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

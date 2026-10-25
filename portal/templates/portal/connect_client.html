@@ -1,0 +1,431 @@
+{% extends "portal/account_base.html" %}
+
+{% block title %}Подключение устройства — Karion{% endblock %}
+
+
+{% block content %}
+<div class="page">
+
+    <div style="margin-bottom:18px;">
+        {% if user.is_authenticated %}
+            <a href="{% url 'cabinet' %}"
+               style="text-decoration:none;color:#6e6e73;font-weight:600;">
+                ← Вернуться в личный кабинет
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="cabinet-header">
+        <h1>Подключение устройства</h1>
+        <p class="subtitle">
+            {{ client.name|default:"Моё подключение" }}
+        </p>
+    </div>
+
+    <div class="card">
+
+        {% if state.code == "active" %}
+            <div style="
+                display:inline-block;
+                padding:7px 12px;
+                border-radius:999px;
+                background:#e8f7ec;
+                color:#137333;
+                font-weight:600;
+                margin-bottom:14px;
+            ">
+                Активна
+            </div>
+        {% else %}
+            <div style="
+                display:inline-block;
+                padding:7px 12px;
+                border-radius:999px;
+                background:#fdecec;
+                color:#b42318;
+                font-weight:600;
+                margin-bottom:14px;
+            ">
+                {{ state.title }}
+            </div>
+        {% endif %}
+
+        {% if client.expires_at %}
+            <div class="subtitle">
+                Действует до
+                <strong>{{ client.expires_at|date:"d.m.Y" }}</strong>
+            </div>
+        {% endif %}
+
+    </div>
+
+    {% if state.can_connect %}
+
+        
+        {% if device.platform == "ios" %}
+
+        <div class="card">
+
+            <h2>📱 Подключение iPhone / iPad</h2>
+
+            <p class="subtitle">
+                Устройство:
+                <strong>{{ device.name }}</strong>
+            </p>
+
+
+            {% if client.allow_full_config %}
+
+                <p class="subtitle">
+                    Выберите режим подключения.
+                </p>
+
+
+                <div style="
+                    margin-top:22px;
+                    padding:18px;
+                    background:#f7f7f9;
+                    border-radius:14px;
+                ">
+                    <strong>🌐 Весь интернет</strong>
+
+                    <p class="subtitle">
+                        Весь интернет-трафик устройства через Karion VPN.
+                    </p>
+
+                    <a class="button button-primary"
+                       href="incy://add/https://lk.karion24.ru/device/{{ device.token }}/full.json">
+                        Добавить в INCY
+                    </a>
+                </div>
+
+
+                <div style="
+                    margin-top:16px;
+                    padding:18px;
+                    background:#f7f7f9;
+                    border-radius:14px;
+                ">
+                    <strong>⚡ Karion VPN</strong>
+
+                    <p class="subtitle">
+                        YouTube, Telegram, WhatsApp, ChatGPT, Instagram и Facebook
+                        будут работать через VPN.
+                        Остальной интернет — напрямую.
+                    </p>
+
+                    <a class="button button-primary"
+                       href="incy://add/https://lk.karion24.ru/device/{{ device.token }}/selective.json">
+                        Добавить в INCY
+                    </a>
+                </div>
+
+
+            {% else %}
+
+
+                <p class="subtitle">
+                    Нажмите кнопку ниже для добавления подключения Karion VPN.
+                </p>
+
+
+                <a class="button button-primary"
+                   href="incy://add/https://lk.karion24.ru/device/{{ device.token }}/selective.json">
+                    Добавить в INCY
+                </a>
+
+
+            {% endif %}
+
+        </div>
+
+
+        {% elif device.platform == "android" %}
+
+
+        <div class="card">
+
+            <h2>🤖 Подключение Android</h2>
+
+            <p class="subtitle">
+                Устройство:
+                <strong>{{ device.name }}</strong>
+            </p>
+
+
+            {% if client.allow_full_config %}
+
+                <p class="subtitle">
+                    Выберите режим подключения.
+                </p>
+
+
+                <div style="
+                    margin-top:22px;
+                    padding:18px;
+                    background:#f7f7f9;
+                    border-radius:14px;
+                ">
+                    <strong>🌐 Весь интернет</strong>
+
+                    <p class="subtitle">
+                        Весь интернет-трафик устройства через Karion VPN.
+                    </p>
+
+                    <a class="button button-primary"
+                       href="incy://add/https://lk.karion24.ru/device/{{ device.token }}/full.json">
+                        Добавить в INCY
+                    </a>
+                </div>
+
+
+                <div style="
+                    margin-top:16px;
+                    padding:18px;
+                    background:#f7f7f9;
+                    border-radius:14px;
+                ">
+                    <strong>⚡ Karion VPN</strong>
+
+                    <p class="subtitle">
+                        YouTube, Telegram, WhatsApp, ChatGPT, Instagram и Facebook
+                        будут работать через VPN.
+                        Остальной интернет — напрямую.
+                    </p>
+
+                    <a class="button button-primary"
+                       href="incy://add/https://lk.karion24.ru/device/{{ device.token }}/selective.json">
+                        Добавить в INCY
+                    </a>
+                </div>
+
+
+            {% else %}
+
+
+                <p class="subtitle">
+                    Нажмите кнопку ниже для добавления подключения Karion VPN.
+                </p>
+
+
+                <a class="button button-primary"
+                   href="incy://add/https://lk.karion24.ru/device/{{ device.token }}/selective.json">
+                    Добавить в INCY
+                </a>
+
+
+            {% endif %}
+
+
+        </div>
+
+
+{% elif device.platform == "windows" %}
+
+        <div class="card">
+
+            <h2>💻 Подключение Windows</h2>
+
+            <p class="subtitle">
+                Устройство:
+                <strong>{{ device.name }}</strong>
+            </p>
+
+            <div style="
+                margin-top:20px;
+                padding:18px;
+                background:#f2f2f7;
+                border-radius:14px;
+            ">
+
+                <strong>
+                    Karion VPN для Windows
+                </strong>
+
+                <p class="subtitle">
+                    Скачайте персональный клиент.
+                    Профиль подключения уже будет настроен автоматически.
+                </p>
+
+                <a
+                    id="windows-download-btn"
+                    class="button button-primary"
+                    href="#"
+                    onclick="startWindowsDownload(); return false;">
+                    ⬇ Скачать Karion VPN для Windows
+                </a>
+
+
+                <div
+                    id="windows-download-status"
+                    style="
+                        display:none;
+                        margin-top:16px;
+                        padding:14px;
+                        background:#ffffff;
+                        border-radius:12px;
+                    ">
+                    ⏳ Подготавливаем персональный клиент...
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="card">
+
+            <h2>Доступные локации</h2>
+
+            <p class="subtitle">
+                Система автоматически выбирает доступные серверы
+                и может переключаться между ними при необходимости.
+            </p>
+
+            <div style="
+                display:flex;
+                gap:10px;
+                flex-wrap:wrap;
+                margin-top:16px;
+            ">
+                {% for location in locations %}
+                    <div style="
+                        background:#f2f2f7;
+                        border-radius:14px;
+                        padding:10px 14px;
+                        font-weight:500;
+                    ">
+                        {% if location.code == "NL" %}🇳🇱
+                        {% elif location.code == "FI" %}🇫🇮
+                        {% elif location.code == "DE" %}🇩🇪
+                        {% elif location.code == "FR" %}🇫🇷
+                        {% elif location.code == "SE" %}🇸🇪
+                        {% elif location.code == "PL" %}🇵🇱
+                        {% elif location.code == "US" %}🇺🇸
+                        {% elif location.code == "GB" %}🇬🇧
+                        {% else %}🌐
+                        {% endif %}
+
+                        {{ location.name }}
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+    {% else %}
+
+        <div class="card">
+            <h2>{{ state.title }}</h2>
+            <p class="subtitle">
+                {{ state.description }}
+            </p>
+
+            {% if user.is_authenticated %}
+                <a class="button button-primary"
+                   href="{% url 'cabinet' %}"
+                   style="margin-top:20px;">
+                    Вернуться в личный кабинет
+                </a>
+            {% endif %}
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+
+<script>
+function downloadWindowsClient() {
+
+    const btn = document.getElementById(
+        "windows-download-btn"
+    );
+
+    const status = document.getElementById(
+        "windows-download-status"
+    );
+
+
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Подготовка...";
+
+    status.style.display = "block";
+
+
+    window.location.href =
+        "{% url 'device_windows_download' device.token %}";
+
+
+    setTimeout(function(){
+
+        btn.disabled = false;
+        btn.innerHTML =
+            "⬇ Скачать Karion VPN для Windows";
+
+    }, 15000);
+
+}
+</script>
+
+
+\n
+<script>
+function startWindowsDownload() {
+
+    const btn = document.getElementById(
+        "windows-download-btn"
+    );
+
+    const status = document.getElementById(
+        "windows-download-status"
+    );
+
+    btn.style.pointerEvents = "none";
+    btn.innerHTML = "⏳ Подготовка клиента...";
+
+    status.style.display = "block";
+
+
+    fetch(
+        "{% url 'device_windows_download' device.token %}"
+    )
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+
+        if (data.url) {
+
+            status.innerHTML =
+                "⬇ Скачивание клиента...";
+
+            window.location.href = data.url;
+            
+            setTimeout(function () {
+            window.location.reload();
+            }, 3000);
+
+        } else {
+
+            status.innerHTML =
+                "Ошибка подготовки клиента";
+
+        }
+
+    })
+    .catch(function() {
+
+        status.innerHTML =
+            "Ошибка загрузки";
+
+    });
+
+}
+</script>
+
+{% endblock %}
+

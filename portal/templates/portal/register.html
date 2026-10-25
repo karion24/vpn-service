@@ -1,0 +1,64 @@
+{% extends "portal/account_base.html" %}
+
+{% block title %}Регистрация — Karion{% endblock %}
+
+{% block content %}
+<div class="page auth-page">
+
+    <div class="card">
+        <h1>Создать аккаунт</h1>
+
+        <p class="subtitle">
+            Зарегистрируйтесь, чтобы управлять своими
+            подписками Karion.
+        </p>
+
+        {% if referral_code %}
+            <div class="referral">
+                Регистрация по приглашению
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="ref"
+                value="{{ referral_code }}"
+            >
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="form-row">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button
+                class="button button-primary button-full form-button"
+                type="submit"
+            >
+                Зарегистрироваться
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Уже есть аккаунт?
+            <a href="{% url 'login' %}">Войти</a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

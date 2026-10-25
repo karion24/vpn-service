@@ -1,0 +1,53 @@
+{% extends "portal/account_base.html" %}
+
+{% block title %}Вход — Karion{% endblock %}
+
+{% block content %}
+<div class="page auth-page">
+
+    <div class="card">
+        <h1>Karion</h1>
+
+        <p class="subtitle">
+            Войдите в личный кабинет.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    Неверный Email или пароль.
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="form-row">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button
+                class="button button-primary button-full form-button"
+                type="submit"
+            >
+                Войти
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Нет аккаунта?
+            <a href="{% url 'register' %}">
+                Зарегистрироваться
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
