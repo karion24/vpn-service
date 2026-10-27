@@ -103,3 +103,6 @@ TELEGRAM_BOT_SERVER_URL = os.getenv("TELEGRAM_BOT_SERVER_URL", "")
 TELEGRAM_BOT_SERVER_TOKEN = os.getenv("TELEGRAM_BOT_SERVER_TOKEN", "")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 MAX_BOT_TOKEN = os.getenv("MAX_BOT_TOKEN", "")
+
+# Confirm on the actual Karion gateway before enabling its response validator.
+TELEGRAM_BOT_SERVER_RESPONSE_VALIDATOR = os.getenv("TELEGRAM_BOT_SERVER_RESPONSE_VALIDATOR", "")

@@ -421,6 +421,11 @@ class Subscription(models.Model):
 # =========================================================
 
 class SubscriptionReminder(models.Model):
+    status = models.CharField(max_length=20, default="pending", choices=(
+        ("pending", "Ожидает"), ("sending", "Отправляется"),
+        ("sent", "Отправлено"), ("failed", "Не отправлено"),
+        ("uncertain", "Результат неизвестен"), ("skipped", "Дата изменилась"),
+    ))
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
     expires_at = models.DateTimeField()
     channel = models.CharField(max_length=20, choices=CustomerProfile.CHANNEL_CHOICES)

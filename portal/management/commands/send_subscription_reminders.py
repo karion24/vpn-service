@@ -38,7 +38,7 @@ class Command(BaseCommand):
                 counts[result] += 1
                 self.stdout.write(f"Subscription #{subscription_id}: {result}")
             self.stdout.write(str(dict(counts)))
-            if counts["failed"] or counts["missing_profile"]:
+            if counts["failed"] or counts["missing_profile"] or counts["needs_review"]:
                 raise CommandError("Часть напоминаний не отправлена; проверьте контакты и настройки каналов.")
         finally:
             os.close(fd)

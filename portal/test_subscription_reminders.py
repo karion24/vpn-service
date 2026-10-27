@@ -102,7 +102,7 @@ class SubscriptionReminderTests(TestCase):
             self.assertEqual(send_subscription_reminder(self.subscription.pk), "failed")
         reminder = SubscriptionReminder.objects.get()
         self.assertIsNone(reminder.sent_at)
-        self.assertEqual(reminder.last_error, "RuntimeError")
+        self.assertEqual(reminder.last_error, "NotificationDeliveryError")
         with override_settings(KARION_NOTIFICATION_BACKENDS={"telegram": "example.send"}):
             with patch("portal.subscription_reminders.import_string") as loader:
                 self.assertEqual(send_subscription_reminder(self.subscription.pk), "sent")
@@ -112,15 +112,15 @@ class SubscriptionReminderTests(TestCase):
 
     def test_max_adapter(self):
         self.profile.primary_channel = "max"
-        self.profile.max_contact = "max-recipient"
+        self.profile.max_contact = "456"
         self.profile.save()
         with override_settings(KARION_NOTIFICATION_BACKENDS={"max": "example.send"}):
             with patch("portal.subscription_reminders.import_string") as loader:
                 self.assertEqual(send_subscription_reminder(self.subscription.pk), "sent")
-                self.assertEqual(loader.return_value.call_args.kwargs["recipient"], "max-recipient")
+                self.assertEqual(loader.return_value.call_args.kwargs["recipient"], "456")
 
     def test_email_failure_is_retried(self):
-        with patch("portal.subscription_reminders.send_mail", side_effect=OSError("smtp")):
+        with patch("portal.subscription_reminders.send_mail", side_effect=__import__("smtplib").SMTPAuthenticationError(535, b"test rejection")):
             self.assertEqual(send_subscription_reminder(self.subscription.pk), "failed")
         self.assertIsNone(SubscriptionReminder.objects.get().sent_at)
         self.assertEqual(send_subscription_reminder(self.subscription.pk), "sent")
@@ -175,3 +175,96 @@ class SubscriptionReminderTests(TestCase):
             with self.assertRaises(CommandError):
                 call_command("send_subscription_reminders", "--apply", stdout=StringIO(), stderr=StringIO())
             self.assertEqual(sender.call_count, 2)
+
+    def test_uncertain_smtp_result_is_not_retried(self):
+        import smtplib
+        with patch("portal.subscription_reminders.send_mail", side_effect=smtplib.SMTPServerDisconnected("unknown")) as sender:
+            self.assertEqual(send_subscription_reminder(self.subscription.pk), "needs_review")
+            self.assertEqual(send_subscription_reminder(self.subscription.pk), "needs_review")
+            sender.assert_called_once()
+        self.assertEqual(SubscriptionReminder.objects.get().status, "uncertain")
+
+    def test_interrupted_process_is_not_retried(self):
+        SubscriptionReminder.objects.create(subscription=self.subscription, expires_at=self.subscription.expires_at, channel="email", status="sending", attempts=1)
+        with patch("portal.subscription_reminders.deliver_reminder") as sender:
+            self.assertEqual(send_subscription_reminder(self.subscription.pk), "needs_review")
+            sender.assert_not_called()
+
+    def test_renewal_after_claim_cancels_stale_message(self):
+        from portal.subscription_reminders import _claim
+        new_expiry = self.subscription.expires_at + timedelta(days=30)
+        def claim_then_renew(*args):
+            result = _claim(*args)
+            Subscription.objects.filter(pk=self.subscription.pk).update(expires_at=new_expiry)
+            return result
+        with patch("portal.subscription_reminders._claim", side_effect=claim_then_renew):
+            with patch("portal.subscription_reminders.deliver_reminder") as sender:
+                self.assertEqual(send_subscription_reminder(self.subscription.pk), "skipped")
+                sender.assert_not_called()
+        self.assertEqual(SubscriptionReminder.objects.get().status, "skipped")
+
+    def test_renewal_during_delivery_keeps_old_attempt_and_new_expiry(self):
+        old_expiry = self.subscription.expires_at
+        new_expiry = old_expiry + timedelta(days=30)
+        def deliver(*args):
+            Subscription.objects.filter(pk=self.subscription.pk).update(expires_at=new_expiry)
+        with patch("portal.subscription_reminders.deliver_reminder", side_effect=deliver) as sender:
+            self.assertEqual(send_subscription_reminder(self.subscription.pk), "sent_date_changed")
+            self.assertEqual(send_subscription_reminder(self.subscription.pk), "skipped")
+            sender.assert_called_once()
+        reminder = SubscriptionReminder.objects.get()
+        self.assertEqual(reminder.expires_at, old_expiry)
+        self.assertEqual(reminder.status, "sent")
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.subscription.expires_at, new_expiry)
+
+    def test_admin_preserves_existing_unselected_contacts(self):
+        self.profile.telegram = "@existing_contact"
+        self.profile.max_contact = "old-max-reference"
+        self.profile.save()
+        form = self.form(telegram="@existing_contact", max_contact="old-max-reference")
+        self.assertTrue(form.is_valid(), form.errors)
+        form.save()
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.telegram, "@existing_contact")
+        self.assertEqual(self.profile.max_contact, "old-max-reference")
+
+    def test_invalid_admin_form_does_not_save_email(self):
+        form = self.form(email="changed@example.com", primary_channel="telegram", telegram="@invalid")
+        self.assertFalse(form.is_valid())
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "client@example.com")
+
+    def test_admin_email_is_rolled_back_if_profile_save_fails(self):
+        from portal.admin import CustomerProfileAdmin
+        from django.contrib.admin import ModelAdmin, AdminSite
+        form = self.form(email="changed@example.com")
+        self.assertTrue(form.is_valid(), form.errors)
+        with patch.object(ModelAdmin, "save_model", side_effect=RuntimeError("db failure")):
+            with self.assertRaises(RuntimeError):
+                CustomerProfileAdmin(CustomerProfile, AdminSite()).save_model(None, form.save(commit=False), form, True)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "client@example.com")
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend", EMAIL_HOST="smtp.yandex.ru", EMAIL_PORT=465, EMAIL_USE_SSL=True, EMAIL_USE_TLS=False, EMAIL_HOST_USER="test@example.com", EMAIL_HOST_PASSWORD="fake-test-password")
+    @patch("django.core.mail.backends.smtp.smtplib.SMTP")
+    @patch("django.core.mail.backends.smtp.smtplib.SMTP_SSL")
+    def test_smtp_uses_ssl_465_and_authentication(self, ssl, plain):
+        ssl.return_value.sendmail.return_value = {}
+        self.assertEqual(send_subscription_reminder(self.subscription.pk), "sent")
+        self.assertEqual(ssl.call_args.args[:2], ("smtp.yandex.ru", 465))
+        ssl.return_value.login.assert_called_once_with("test@example.com", "fake-test-password")
+        ssl.return_value.starttls.assert_not_called()
+        plain.assert_not_called()
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend", EMAIL_HOST_PASSWORD="")
+    @patch("portal.subscription_reminders.send_mail")
+    def test_missing_smtp_password_fails_before_sending(self, sender):
+        self.assertEqual(send_subscription_reminder(self.subscription.pk), "failed")
+        sender.assert_not_called()
+
+    def test_smtp_zero_result_is_failed_and_no_fallback(self):
+        with patch("portal.subscription_reminders.send_mail", return_value=0):
+            with patch("portal.subscription_reminders.import_string") as messenger:
+                self.assertEqual(send_subscription_reminder(self.subscription.pk), "failed")
+                messenger.assert_not_called()

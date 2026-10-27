@@ -20,6 +20,7 @@ from .remnawave_node_create import (
     RemnawaveNodeCreateError,
 )
 from django import forms
+from django.db import transaction
 from django.contrib import admin, messages
 from django.urls import reverse, path
 from django.http import HttpResponse
@@ -163,6 +164,7 @@ class CustomerProfileAdminForm(forms.ModelForm):
 class CustomerProfileAdmin(admin.ModelAdmin):
     form = CustomerProfileAdminForm
 
+    @transaction.atomic
     def save_model(self, request, obj, form, change):
         obj.user.email = form.cleaned_data["email"]
         obj.user.save(update_fields=["email"])
