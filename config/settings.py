@@ -81,3 +81,25 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/cabinet/"
 LOGOUT_REDIRECT_URL = "/login/"
+
+# Expiry reminders and messenger contracts from the Karion dashboard.
+KARION_CABINET_URL = os.getenv("KARION_CABINET_URL", "https://lk.karion24.ru/cabinet/")
+KARION_REMINDER_LOCK_FILE = os.getenv("KARION_REMINDER_LOCK_FILE", "/tmp/karion-subscription-reminders.lock")
+KARION_NOTIFICATION_BACKENDS = {
+    "telegram": os.getenv("KARION_TELEGRAM_NOTIFICATION_BACKEND", "portal.notification_backends.send_telegram"),
+    "max": os.getenv("KARION_MAX_NOTIFICATION_BACKEND", "portal.notification_backends.send_max"),
+}
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.yandex.ru")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "465"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "info@karion24.ru")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "0") == "1"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "1") == "1"
+EMAIL_TIMEOUT = 15
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Karion <info@karion24.ru>")
+
+TELEGRAM_BOT_SERVER_URL = os.getenv("TELEGRAM_BOT_SERVER_URL", "")
+TELEGRAM_BOT_SERVER_TOKEN = os.getenv("TELEGRAM_BOT_SERVER_TOKEN", "")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+MAX_BOT_TOKEN = os.getenv("MAX_BOT_TOKEN", "")

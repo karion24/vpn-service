@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 def generate_token():
@@ -10,6 +11,14 @@ def generate_token():
 
 
 class CustomerProfile(models.Model):
+    CHANNEL_EMAIL = "email"
+    CHANNEL_TELEGRAM = "telegram"
+    CHANNEL_MAX = "max"
+    CHANNEL_CHOICES = (
+        (CHANNEL_EMAIL, "Электронный адрес"),
+        (CHANNEL_TELEGRAM, "Telegram"),
+        (CHANNEL_MAX, "Max"),
+    )
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -25,6 +34,36 @@ class CustomerProfile(models.Model):
         max_length=100,
         blank=True,
     )
+
+    max_contact = models.CharField("Max", max_length=100, blank=True)
+    primary_channel = models.CharField(
+        "Основной канал", max_length=20, choices=CHANNEL_CHOICES,
+        default=CHANNEL_EMAIL,
+    )
+
+    def notification_recipient(self):
+        if self.primary_channel == self.CHANNEL_EMAIL:
+            return (self.user.email or "").strip() if self.user_id else ""
+        if self.primary_channel == self.CHANNEL_TELEGRAM:
+            return (self.telegram or "").strip()
+        if self.primary_channel == self.CHANNEL_MAX:
+            return (self.max_contact or "").strip()
+        return ""
+
+    def clean(self):
+        super().clean()
+        if not self.notification_recipient():
+            label = dict(self.CHANNEL_CHOICES).get(self.primary_channel, "Канал")
+            raise ValidationError({
+                "primary_channel": f"Нельзя выбрать {label}: контакт не заполнен."
+            })
+
+        if self.primary_channel in (self.CHANNEL_TELEGRAM, self.CHANNEL_MAX):
+            from .notification_backends import recipient_id
+            try:
+                recipient_id(self.notification_recipient())
+            except ValueError as exc:
+                raise ValidationError({"primary_channel": str(exc)}) from None
 
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -380,6 +419,21 @@ class Subscription(models.Model):
 # =========================================================
 # BILLING
 # =========================================================
+
+class SubscriptionReminder(models.Model):
+    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
+    expires_at = models.DateTimeField()
+    channel = models.CharField(max_length=20, choices=CustomerProfile.CHANNEL_CHOICES)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    attempts = models.PositiveIntegerField(default=0)
+    last_error = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(
+            fields=("subscription", "expires_at"),
+            name="unique_subscription_expiry_reminder",
+        )]
+
 
 class Order(models.Model):
     TYPE_NEW = "new"

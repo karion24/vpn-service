@@ -137,13 +137,43 @@ class DeviceInline(admin.TabularInline):
         return False
 
 
+class CustomerProfileAdminForm(forms.ModelForm):
+    email = forms.EmailField(label="Электронный адрес", required=False)
+
+    class Meta:
+        model = CustomerProfile
+        fields = ("phone", "telegram", "max_contact", "primary_channel")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.user_id:
+            self.fields["email"].initial = self.instance.user.email
+        self.fields["telegram"].help_text = "Числовой chat_id личного чата с вашим ботом; не @username."
+        self.fields["max_contact"].help_text = "Числовой user_id MAX. Пользователь должен разрешить сообщения бота."
+
+    def clean(self):
+        cleaned = super().clean()
+        # Model.clean validates against the email being submitted, not the old one.
+        if self.instance.user_id and "email" in cleaned:
+            self.instance.user.email = cleaned["email"]
+        return cleaned
+
+
 @admin.register(CustomerProfile)
 class CustomerProfileAdmin(admin.ModelAdmin):
+    form = CustomerProfileAdminForm
+
+    def save_model(self, request, obj, form, change):
+        obj.user.email = form.cleaned_data["email"]
+        obj.user.save(update_fields=["email"])
+        super().save_model(request, obj, form, change)
 
     list_display = (
         "email_display",
         "phone",
         "telegram",
+        "max_contact",
+        "primary_channel",
         "subscriptions_display",
         "devices_display",
         "date_joined_display",
@@ -156,6 +186,7 @@ class CustomerProfileAdmin(admin.ModelAdmin):
         "user__last_name",
         "phone",
         "telegram",
+        "max_contact",
     )
 
     readonly_fields = (
@@ -178,11 +209,13 @@ class CustomerProfileAdmin(admin.ModelAdmin):
             "Клиент",
             {
                 "fields": (
-                    "email_display",
+                    "email",
                     "first_name_display",
                     "last_name_display",
                     "phone",
                     "telegram",
+                    "max_contact",
+                    "primary_channel",
                 ),
             },
         ),
